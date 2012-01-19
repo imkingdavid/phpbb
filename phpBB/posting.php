@@ -316,7 +316,10 @@ if ($mode == 'delete')
 // Handle bump mode...
 if ($mode == 'bump')
 {
-	if ($bump_time = bump_topic_allowed($forum_id, $post_data['topic_bumped'], $post_data['topic_last_post_time'], $post_data['topic_poster'], $post_data['topic_last_poster_id'])
+	$last_post_time = !$auth->acl_get('m_') ? $post_data['topic_last_post_time'] : $post_data['topic_last_post_time_real'];
+	$last_poster_id = !$auth->acl_get('m_') ? $post_data['topic_last_poster_id'] : $post_data['topic_last_poster_id_real'];
+
+	if ($bump_time = bump_topic_allowed($forum_id, $post_data['topic_bumped'], $last_post_time, $post_data['topic_poster'], $last_poster_id)
 	   && check_link_hash(request_var('hash', ''), "topic_{$post_data['topic_id']}"))
 	{
 		$meta_url = phpbb_bump_topic($forum_id, $topic_id, $post_data, $current_time);
@@ -716,7 +719,8 @@ if ($submit || $preview || $refresh)
 	// If replying/quoting and last post id has changed
 	// give user option to continue submit or return to post
 	// notify and show user the post made between his request and the final submit
-	if (($mode == 'reply' || $mode == 'quote') && $post_data['topic_cur_post_id'] && $post_data['topic_cur_post_id'] != $post_data['topic_last_post_id'])
+	$last_post_id = !$auth->acl_get('m_') ? $post_data['topic_last_post_id'] : $post_data['topic_last_post_id_real'];
+	if (($mode == 'reply' || $mode == 'quote') && $post_data['topic_cur_post_id'] && $post_data['topic_cur_post_id'] != $last_post_id)
 	{
 		// Only do so if it is allowed forum-wide
 		if ($post_data['forum_flags'] & FORUM_FLAG_POST_REVIEW)

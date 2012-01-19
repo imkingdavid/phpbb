@@ -151,7 +151,7 @@ function generate_smilies($mode, $forum_id)
 */
 function update_post_information($type, $ids, $return_update_sql = false)
 {
-	global $db;
+	global $db, $phpbb_root_path, $phpEx;
 
 	if (empty($ids))
 	{
@@ -161,153 +161,12 @@ function update_post_information($type, $ids, $return_update_sql = false)
 	{
 		$ids = array($ids);
 	}
-
-
-	$update_sql = $empty_forums = $not_empty_forums = array();
-
-	if ($type != 'topic')
+	if (!class_exists('phpbb_last_post_info'))
 	{
-		$topic_join = ', ' . TOPICS_TABLE . ' t';
-		$topic_condition = 'AND t.topic_id = p.topic_id AND t.topic_approved = 1';
-		$topic_condition_real = 'AND t.topic_id = p.topic_id';
-	}
-	else
-	{
-		$topic_join = '';
-		$topic_condition = '';
+		include("{$phpbb_root_path}includes/functions_last_post.$phpEx");
 	}
 
-	if (sizeof($ids) == 1)
-	{
-		$sql = '(SELECT MAX(p.post_id) as last_post_id
-			FROM ' . POSTS_TABLE . " p $topic_join
-			WHERE " . $db->sql_in_set('p.' . $type . '_id', $ids) . "
-				$topic_condition
-				AND p.post_approved = 1)
-			UNION
-			(SELECT MAX(p.post_id) as last_post_id_real
-			FROM " . POSTS_TABLE . " p $topic_join
-			WHERE " . $db->sql_in_set('p.' . $type . '_id', $ids) . "
-				$topic_condition_real)";
-	}
-	else
-	{
-		$sql = '(SELECT p.' . $type . '_id, MAX(p.post_id) as last_post_id
-			FROM ' . POSTS_TABLE . " p $topic_join
-			WHERE " . $db->sql_in_set('p.' . $type . '_id', $ids) . "
-				$topic_condition
-				AND p.post_approved = 1
-			GROUP BY p.{$type}_id)
-			UNION
-			(SELECT p." . $type . '_id, MAX(p.post_id) as last_post_id_real
-			FROM ' . POSTS_TABLE . " p $topic_join
-			WHERE " . $db->sql_in_set('p.' . $type . '_id', $ids) . "
-				$topic_condition_real
-			GROUP BY p.{$type}_id)";
-	}
-	$result = $db->sql_query($sql);
-
-	$last_post_ids = $last_post_real_ids = array();
-	while ($row = $db->sql_fetchrow($result))
-	{
-		if (sizeof($ids) == 1)
-		{
-			$row[$type . '_id'] = $ids[0];
-		}
-
-		if ($type == 'forum')
-		{
-			$not_empty_forums[] = $row['forum_id'];
-
-			if (empty($row['last_post_id']) && empty($row['last_post_id_real']))
-			{
-				$empty_forums[] = $row['forum_id'];
-			}
-		}
-
-		$last_post_ids[] = $row['last_post_id'];
-		$last_post_real_ids[] = $row['last_post_id_real'];
-	}
-	$db->sql_freeresult($result);
-
-	if ($type == 'forum')
-	{
-		$empty_forums = array_merge($empty_forums, array_diff($ids, $not_empty_forums));
-
-		foreach ($empty_forums as $void => $forum_id)
-		{
-			$update_sql[$forum_id][] = 'forum_last_post_id = 0';
-			$update_sql[$forum_id][] = "forum_last_post_subject = ''";
-			$update_sql[$forum_id][] = 'forum_last_post_time = 0';
-			$update_sql[$forum_id][] = 'forum_last_poster_id = 0';
-			$update_sql[$forum_id][] = "forum_last_poster_name = ''";
-			$update_sql[$forum_id][] = "forum_last_poster_colour = ''";
-			$update_sql[$forum_id][] = 'forum_last_post_id_real = 0';
-			$update_sql[$forum_id][] = "forum_last_post_subject_real = ''";
-			$update_sql[$forum_id][] = 'forum_last_post_time_real = 0';
-			$update_sql[$forum_id][] = 'forum_last_poster_id_real = 0';
-			$update_sql[$forum_id][] = "forum_last_poster_name_real = ''";
-			$update_sql[$forum_id][] = "forum_last_poster_colour_real = ''";
-		}
-	}
-
-	if (sizeof($last_post_ids))
-	{
-		$sql = 'SELECT p.' . $type . '_id, p.post_id, p.post_subject, p.post_time, p.poster_id, p.post_username, u.user_id, u.username, u.user_colour
-			FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
-			WHERE p.poster_id = u.user_id
-				AND ' . $db->sql_in_set('p.post_id', $last_post_ids);
-		$result = $db->sql_query($sql);
-
-		while ($row = $db->sql_fetchrow($result))
-		{
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_post_id = ' . (int) $row['post_id'];
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_post_subject = '" . $db->sql_escape($row['post_subject']) . "'";
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_post_time = ' . (int) $row['post_time'];
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_poster_id = ' . (int) $row['poster_id'];
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_poster_colour = '" . $db->sql_escape($row['user_colour']) . "'";
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_poster_name = '" . (($row['poster_id'] == ANONYMOUS) ? $db->sql_escape($row['post_username']) : $db->sql_escape($row['username'])) . "'";
-		}
-		$db->sql_freeresult($result);
-	}
-
-	if (sizeof($last_post_real_ids))
-	{
-		$sql = 'SELECT p.' . $type . '_id, p.post_id, p.post_subject, p.post_time, p.poster_id, p.post_username,
-			u.user_id, u.username, u.user_colour
-			FROM ' . POSTS_TABLE . ' p, ' . USERS_TABLE . ' u
-			WHERE p.poster_id = u.user_id
-				AND ' . $db->sql_in-set('p.post_id', $last_post_real_ids);
-		$result = $db->sql_query($sql);
-
-		while ($row = $db->sql_fetchrow($result))
-		{
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_post_id_real = ' . (int) $row['post_id'];
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_post_subject_real = '" . $db->sql_escape($row['post_subject']) . "'";
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_post_time_real = ' . (int) $row['post_time'];
-			$update_sql[$row["{$type}_id"]][] = $type . '_last_poster_id_real = ' . (int) $row['poster_id'];
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_poster_colour_real = '" . $db->sql_escape($row['user_colour']) . "'";
-			$update_sql[$row["{$type}_id"]][] = "{$type}_last_poster_name_real = '" . (($row['poster_id'] == ANONYMOUS) ? $db->sql_escape($row['post_username']) : $db->sql_escape($row['username'])) . "'";
-		}
-	}
-	unset($empty_forums, $ids, $last_post_ids, $last_post_real_ids);
-
-	if ($return_update_sql || !sizeof($update_sql))
-	{
-		return $update_sql;
-	}
-
-	$table = ($type == 'forum') ? FORUMS_TABLE : TOPICS_TABLE;
-
-	foreach ($update_sql as $update_id => $update_sql_ary)
-	{
-		$sql = "UPDATE $table
-			SET " . implode(', ', $update_sql_ary) . "
-			WHERE {$type}_id = $update_id";
-		$db->sql_query($sql);
-	}
-
-	return;
+	return ($return_update_sql) ? phpbb_last_post_info::get($type, $ids) : phpbb_last_post_info::set($type, $ids);
 }
 
 /**
