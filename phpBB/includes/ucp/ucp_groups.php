@@ -192,11 +192,11 @@ class ucp_groups
 							{
 								if ($group_row[$group_id]['group_type'] == GROUP_FREE)
 								{
-									group_user_add($group_id, $user->data['user_id']);
+									phpbb_group_user_add($group_id, $user->data['user_id']);
 								}
 								else
 								{
-									group_user_add($group_id, $user->data['user_id'], false, false, false, 0, 1);
+									phpbb_group_user_add($group_id, $user->data['user_id'], false, false, false, 0, 1);
 
 									include_once($phpbb_root_path . 'includes/functions_messenger.' . $phpEx);
 									$messenger = new messenger();
@@ -1050,7 +1050,7 @@ class ucp_groups
 						if (confirm_box(true))
 						{
 							// Add user/s to group
-							if ($error = group_user_add($group_id, false, $name_ary, $group_name, $default, 0, 0, $group_row))
+							if ($error = phpbb_group_user_add($group_id, false, $name_ary, $group_name, $default, 0, 0, $group_row))
 							{
 								trigger_error($user->lang[$error] . $return_page);
 							}

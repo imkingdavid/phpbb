@@ -304,7 +304,7 @@ class ucp_register
 				}
 
 				// Register user...
-				$user_id = user_add($user_row, $cp_data);
+				$user_id = phpbb_user_add($user_row, $cp_data);
 
 				// This should not happen, because the required variables are listed above...
 				if ($user_id === false)

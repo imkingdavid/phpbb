@@ -2167,7 +2167,7 @@ class acp_users
 					}
 
 					// Add user/s to group
-					if ($error = group_user_add($group_id, $user_id))
+					if ($error = phpbb_group_user_add($group_id, $user_id))
 					{
 						trigger_error($user->lang[$error] . adm_back_link($this->u_action . '&amp;u=' . $user_id), E_USER_WARNING);
 					}

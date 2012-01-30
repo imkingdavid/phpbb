@@ -926,7 +926,7 @@ class auth
 					include($phpbb_root_path . 'includes/functions_user.' . $phpEx);
 				}
 
-				user_add($login['user_row'], (isset($login['cp_data'])) ? $login['cp_data'] : false);
+				phpbb_user_add($login['user_row'], (isset($login['cp_data'])) ? $login['cp_data'] : false);
 
 				$sql = 'SELECT user_id, username, user_password, user_passchg, user_email, user_type
 					FROM ' . USERS_TABLE . "

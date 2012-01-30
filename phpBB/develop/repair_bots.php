@@ -132,7 +132,7 @@ function add_bots($bots)
 			'user_allow_massemail'	=> 0,
 		);
 
-		$user_id = user_add($user_row);
+		$user_id = phpbb_user_add($user_row);
 
 		if ($user_id)
 		{

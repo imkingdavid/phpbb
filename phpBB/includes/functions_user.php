@@ -141,6 +141,23 @@ function user_update_name($old_name, $new_name)
 	$cache->destroy('sql', MODERATOR_CACHE_TABLE);
 }
 
+if (!function_exists('user_add'))
+{
+	/**
+	* Adds an user
+	* NOTE: Deprecated; this is just a wrapper for its phpbb_* variant for compatibility's sake
+	*
+	* @param mixed $user_row An array containing the following keys (and the appropriate values): username, group_id (the group to place the user in), user_email and the user_type(usually 0). Additional entries not overridden by defaults will be forwarded.
+	* @param string $cp_data custom profile fields, see custom_profile::build_insert_sql_array
+	* @return the new user's ID.
+	* @deprecated
+	*/
+	function user_add()
+	{
+		return call_user_func_array('phpbb_user_add', func_get_args());
+	}
+}
+
 /**
 * Adds an user
 *
@@ -148,7 +165,7 @@ function user_update_name($old_name, $new_name)
 * @param string $cp_data custom profile fields, see custom_profile::build_insert_sql_array
 * @return the new user's ID.
 */
-function user_add($user_row, $cp_data = false)
+function phpbb_user_add($user_row, $cp_data = false)
 {
 	global $db, $user, $auth, $config, $phpbb_root_path, $phpEx;
 
@@ -295,12 +312,12 @@ function user_add($user_row, $cp_data = false)
 			// Add user to "newly registered users" group and set to default group if admin specified so.
 			if ($config['new_member_group_default'])
 			{
-				group_user_add($add_group_id, $user_id, false, false, true);
+				phpbb_group_user_add($add_group_id, $user_id, false, false, true);
 				$user_row['group_id'] = $add_group_id;
 			}
 			else
 			{
-				group_user_add($add_group_id, $user_id);
+				phpbb_group_user_add($add_group_id, $user_id);
 			}
 
 			unset($GLOBALS['skip_add_log']);
@@ -2833,12 +2850,27 @@ function group_delete($group_id, $group_name = false)
 	return false;
 }
 
+if (!function_exists('group_user_add'))
+{
+	/**
+	* Add user(s) to group
+	* NOTE: Deprecated; this is just a wrapper for its phpbb_* variant for compatibility's sake
+	*
+	* @return mixed false if no errors occurred, else the user lang string for the relevant error, for example 'NO_USER'
+	* @deprecated
+	*/
+	function group_user_add()
+	{
+		return call_user_func_array('phpbb_group_user_add', func_get_args());
+	}
+}
+
 /**
 * Add user(s) to group
 *
 * @return mixed false if no errors occurred, else the user lang string for the relevant error, for example 'NO_USER'
 */
-function group_user_add($group_id, $user_id_ary = false, $username_ary = false, $group_name = false, $default = false, $leader = 0, $pending = 0, $group_attributes = false)
+function phpbb_group_user_add($group_id, $user_id_ary = false, $username_ary = false, $group_name = false, $default = false, $leader = 0, $pending = 0, $group_attributes = false)
 {
 	global $db, $auth;
 

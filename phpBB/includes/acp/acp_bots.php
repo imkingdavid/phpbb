@@ -221,7 +221,7 @@ class acp_bots
 							}
 						
 
-							$user_id = user_add(array(
+							$user_id = phpbb_user_add(array(
 								'user_type'				=> (int) USER_IGNORE,
 								'group_id'				=> (int) $group_row['group_id'],
 								'username'				=> (string) $bot_row['bot_name'],

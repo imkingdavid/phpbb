@@ -170,7 +170,7 @@ function autologin_apache()
 		}
 
 		// create the user if he does not exist yet
-		user_add(user_row_apache($php_auth_user, $php_auth_pw));
+		phpbb_user_add(user_row_apache($php_auth_user, $php_auth_pw));
 
 		$sql = 'SELECT *
 			FROM ' . USERS_TABLE . "

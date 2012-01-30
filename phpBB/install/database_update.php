@@ -1975,7 +1975,7 @@ function change_database_data(&$no_updates, $version)
 					'user_allow_massemail'	=> 0,
 				);
 
-				$user_id = user_add($user_row);
+				$user_id = phpbb_user_add($user_row);
 
 				$sql = 'INSERT INTO ' . BOTS_TABLE . ' ' . $db->sql_build_array('INSERT', array(
 					'bot_active'	=> 1,
