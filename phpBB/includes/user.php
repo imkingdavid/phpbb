@@ -185,6 +185,9 @@ class phpbb_user extends phpbb_session
 			trigger_error('Could not get style data', E_USER_ERROR);
 		}
 
+		// Get the style's language keys, if any
+		$this->add_lang_style($style);
+
 		// Now parse the cfg file and cache it
 		$parsed_items = $cache->obtain_cfg_items($this->theme);
 
@@ -508,6 +511,35 @@ class phpbb_user extends phpbb_session
 		}
 
 		$this->add_lang($lang_set, $use_db, $use_help, $ext_name);
+	}
+
+	/**
+	* Add language file from styles (i.e. styles/myStyle/lang/en.php)
+	* NOTE: Child styles are responsible for include()-ing parent styles' corresponding
+	* language files, (i.e. child/lang/en.php should include parent/lang/en.php) but only
+	* if the parent style has a corresponding language file
+	*
+	* @return null
+	* @access private
+	*/
+	private function add_lang_style()
+	{
+		global $user, $style, $config, $phpEx;
+		$language_file = $style->locate(
+			array_unique(array(
+					'lang/' . $user->data['user_lang'] . '.' . $phpEx,
+					'lang/' . $config['default_lang'] . '.' . $phpEx,
+					'lang/en.' . $phpEx,
+			)),
+			false,
+			true
+		);
+		//var_dump($language_file, $user->data);
+
+		if (!empty($language_file))
+		{
+			include($language_file);
+		}
 	}
 
 	/**
