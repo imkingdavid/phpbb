@@ -888,17 +888,21 @@ class phpbb_template_filter extends php_user_filter
 		{
 			$finder = $this->extension_manager->get_finder();
 
-			$files = $finder
-				->extension_prefix($location)
-				->extension_suffix('.html')
-				->extension_directory("/styles/all/template")
-				->get_files();
+			// Get all styles in the style tree, including 'all', for extension template events
+			$styles_tree = $this->user->theme['style_parent_id'] ? array_reverse(explode('/', $this->user->theme['style_parent_tree'])) : array();
+			$paths = array('all');
+			$paths = array_merge($paths, $styles_tree);
+			$paths[] = $this->user->theme['style_name'];
+			$files = array();
 
-			$files = array_merge($files, $finder
-				->extension_prefix($location)
-				->extension_suffix('.html')
-				->extension_directory("/styles/" . $this->style_name . "/template")
-				->get_files());
+			foreach($paths as $path)
+			{
+				$files = array_merge($files, $finder
+					->extension_prefix($location)
+					->extension_suffix('.html')
+					->extension_directory("/styles/$path/template")
+					->get_files());
+			}
 
 			$all_compiled = '';
 			foreach ($files as $file)
