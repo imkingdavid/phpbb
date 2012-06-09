@@ -889,7 +889,7 @@ class phpbb_template_filter extends php_user_filter
 			$finder = $this->extension_manager->get_finder();
 
 			// Get all styles in the style tree, including 'all', for extension template events
-			$styles_tree = $this->user->theme['style_parent_id'] ? array_reverse(explode('/', $this->user->theme['style_parent_tree'])) : array();
+			$styles_tree = $this->user->theme['style_parent_id'] ? explode('/', $this->user->theme['style_parent_tree']) : array();
 			$paths = array('all');
 			$paths = array_merge($paths, $styles_tree);
 			$paths[] = $this->user->theme['style_name'];
