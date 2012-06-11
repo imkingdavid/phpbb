@@ -649,6 +649,7 @@ CREATE TABLE phpbb_posts (
 	post_attachment INT2 DEFAULT '0' NOT NULL CHECK (post_attachment >= 0),
 	bbcode_bitfield varchar(255) DEFAULT '' NOT NULL,
 	bbcode_uid varchar(8) DEFAULT '' NOT NULL,
+	post_wiki INT2 DEFAULT '0' NOT NULL CHECK (post_wiki >= 0),
 	post_postcount INT2 DEFAULT '1' NOT NULL CHECK (post_postcount >= 0),
 	post_edit_time INT4 DEFAULT '0' NOT NULL CHECK (post_edit_time >= 0),
 	post_edit_reason varchar(255) DEFAULT '' NOT NULL,
@@ -665,6 +666,30 @@ CREATE INDEX phpbb_posts_poster_id ON phpbb_posts (poster_id);
 CREATE INDEX phpbb_posts_post_approved ON phpbb_posts (post_approved);
 CREATE INDEX phpbb_posts_post_username ON phpbb_posts (post_username);
 CREATE INDEX phpbb_posts_tid_post_time ON phpbb_posts (topic_id, post_time);
+
+/*
+	Table: 'phpbb_post_revisions'
+*/
+CREATE SEQUENCE phpbb_post_revisions_seq;
+
+CREATE TABLE phpbb_post_revisions (
+	revision_id INT4 DEFAULT nextval('phpbb_post_revisions_seq'),
+	post_id INT4 DEFAULT '0' NOT NULL CHECK (post_id >= 0),
+	user_id INT4 DEFAULT '0' NOT NULL CHECK (user_id >= 0),
+	revision_time INT4 DEFAULT '0' NOT NULL CHECK (revision_time >= 0),
+	revision_subject varchar(255) DEFAULT '' NOT NULL,
+	revision_text TEXT DEFAULT '' NOT NULL,
+	revision_checksum varchar(32) DEFAULT '' NOT NULL,
+	revision_attachment INT2 DEFAULT '0' NOT NULL CHECK (revision_attachment >= 0),
+	bbcode_bitfield varchar(255) DEFAULT '' NOT NULL,
+	bbcode_uid varchar(8) DEFAULT '' NOT NULL,
+	revision_reason varchar(255) DEFAULT '' NOT NULL,
+	PRIMARY KEY (revision_id)
+);
+
+CREATE INDEX phpbb_post_revisions_post_id ON phpbb_post_revisions (post_id);
+CREATE INDEX phpbb_post_revisions_user_id ON phpbb_post_revisions (user_id);
+CREATE INDEX phpbb_post_revisions_time ON phpbb_post_revisions (revision_time);
 
 /*
 	Table: 'phpbb_privmsgs'
@@ -873,6 +898,17 @@ CREATE TABLE phpbb_reports_reasons (
 	PRIMARY KEY (reason_id)
 );
 
+
+/*
+	Table: 'phpbb_revision_attachments'
+*/
+CREATE TABLE phpbb_revision_attachments (
+	revision_id INT4 DEFAULT '0' NOT NULL CHECK (revision_id >= 0),
+	attachment_id INT4 DEFAULT '0' NOT NULL CHECK (attachment_id >= 0)
+);
+
+CREATE INDEX phpbb_revision_attachments_r_id ON phpbb_revision_attachments (revision_id);
+CREATE INDEX phpbb_revision_attachments_a_id ON phpbb_revision_attachments (attachment_id);
 
 /*
 	Table: 'phpbb_search_results'

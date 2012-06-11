@@ -475,6 +475,7 @@ CREATE TABLE phpbb_posts (
 	post_attachment tinyint(1) UNSIGNED DEFAULT '0' NOT NULL,
 	bbcode_bitfield varbinary(255) DEFAULT '' NOT NULL,
 	bbcode_uid varbinary(8) DEFAULT '' NOT NULL,
+	post_wiki tinyint(1) UNSIGNED DEFAULT '0' NOT NULL,
 	post_postcount tinyint(1) UNSIGNED DEFAULT '1' NOT NULL,
 	post_edit_time int(11) UNSIGNED DEFAULT '0' NOT NULL,
 	post_edit_reason blob NOT NULL,
@@ -489,6 +490,26 @@ CREATE TABLE phpbb_posts (
 	KEY post_approved (post_approved),
 	KEY post_username (post_username(255)),
 	KEY tid_post_time (topic_id, post_time)
+);
+
+
+# Table: 'phpbb_post_revisions'
+CREATE TABLE phpbb_post_revisions (
+	revision_id mediumint(8) UNSIGNED NOT NULL auto_increment,
+	post_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+	user_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+	revision_time int(11) UNSIGNED DEFAULT '0' NOT NULL,
+	revision_subject blob NOT NULL,
+	revision_text mediumblob NOT NULL,
+	revision_checksum varbinary(32) DEFAULT '' NOT NULL,
+	revision_attachment tinyint(1) UNSIGNED DEFAULT '0' NOT NULL,
+	bbcode_bitfield varbinary(255) DEFAULT '' NOT NULL,
+	bbcode_uid varbinary(8) DEFAULT '' NOT NULL,
+	revision_reason blob NOT NULL,
+	PRIMARY KEY (revision_id),
+	KEY post_id (post_id),
+	KEY user_id (user_id),
+	KEY time (revision_time)
 );
 
 
@@ -661,6 +682,15 @@ CREATE TABLE phpbb_reports_reasons (
 	reason_description mediumblob NOT NULL,
 	reason_order smallint(4) UNSIGNED DEFAULT '0' NOT NULL,
 	PRIMARY KEY (reason_id)
+);
+
+
+# Table: 'phpbb_revision_attachments'
+CREATE TABLE phpbb_revision_attachments (
+	revision_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+	attachment_id mediumint(8) UNSIGNED DEFAULT '0' NOT NULL,
+	KEY r_id (revision_id),
+	KEY a_id (attachment_id)
 );
 
 

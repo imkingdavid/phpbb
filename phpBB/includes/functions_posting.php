@@ -1723,7 +1723,7 @@ function submit_post($mode, $subject, $username, $topic_type, &$poll, &$data, $u
 				'bbcode_bitfield'	=> $data['bbcode_bitfield'],
 				'bbcode_uid'		=> $data['bbcode_uid'],
 				'post_postcount'	=> ($auth->acl_get('f_postcount', $data['forum_id'])) ? 1 : 0,
-				'post_edit_locked'	=> $data['post_edit_locked']
+				'post_edit_locked'	=> $data['post_edit_locked'],
 			);
 		break;
 
@@ -1733,16 +1733,16 @@ function submit_post($mode, $subject, $username, $topic_type, &$poll, &$data, $u
 		case 'edit_last_post':
 		case 'edit_topic':
 
-			// If edit reason is given always display edit info
+			// If edit reason is given or if we are tracking post revisions always display edit info
 
 			// If editing last post then display no edit info
 			// If m_edit permission then display no edit info
 			// If normal edit display edit info
 
 			// Display edit info if edit reason given or user is editing his post, which is not the last within the topic.
-			if ($data['post_edit_reason'] || (!$auth->acl_get('m_edit', $data['forum_id']) && ($post_mode == 'edit' || $post_mode == 'edit_first_post')))
+			if ($config['track_post_revisions'] || $data['post_edit_reason'] || (!$auth->acl_get('m_edit', $data['forum_id']) && ($post_mode == 'edit' || $post_mode == 'edit_first_post')))
 			{
-				$data['post_edit_reason']		= truncate_string($data['post_edit_reason'], 255, 255, false);
+				$data['post_edit_reason'] = (truncate_string($data['post_edit_reason'], 255, 255, false)) ?: '';
 
 				$sql_data[POSTS_TABLE]['sql']	= array(
 					'post_edit_time'	=> $current_time,
@@ -1793,6 +1793,22 @@ function submit_post($mode, $subject, $username, $topic_type, &$poll, &$data, $u
 			if ($update_message)
 			{
 				$sql_data[POSTS_TABLE]['sql']['post_text'] = $data['message'];
+			}
+
+			if ($config['track_post_revisions'] && !empty($data['original_post_data']) && ($data['poster_id'] == $user->data['user_id'] || (!$data['post_edit_locked'] ||	$auth->acl_getf('m_edit', $data['forum_id']))))
+			{				
+				$sql_data[POST_REVISIONS_TABLE]['sql'] = array(
+					'post_id'				=> $data['original_post_data']['post_id'],
+					'user_id'				=> $data['original_post_data']['user_id'],
+					'revision_time'			=> $data['original_post_data']['post_time'],
+					'revision_subject'		=> $data['original_post_data']['post_subject'],
+					'revision_text'			=> $data['original_post_data']['message'],
+					'revision_checksum'		=> $data['original_post_data']['post_checksum'],
+					'revision_attachment'	=> $data['original_post_data']['post_attachment'],
+					'bbcode_bitfield'		=> $data['original_post_data']['bbcode_bitfield'],
+					'bbcode_uid'			=> $data['original_post_data']['bbcode_uid'],
+					'revision_reason'		=> $data['original_post_data']['post_edit_reason'],
+				);
 			}
 
 		break;
@@ -2007,6 +2023,14 @@ function submit_post($mode, $subject, $username, $topic_type, &$poll, &$data, $u
 		$sql = 'UPDATE ' . TOPICS_TABLE . '
 			SET ' . $db->sql_build_array('UPDATE', $sql_data[TOPICS_TABLE]['sql']) . '
 			WHERE topic_id = ' . $data['topic_id'];
+		$db->sql_query($sql);
+	}
+
+	// If applicable, insert a new post revision
+	if (isset($sql_data[POST_REVISIONS_TABLE]['sql']))
+	{
+		$sql = 'INSERT INTO ' . POST_REVISIONS_TABLE . '
+			' . $db->sql_build_array('INSERT', $sql_data[POST_REVISIONS_TABLE]['sql']);
 		$db->sql_query($sql);
 	}
 

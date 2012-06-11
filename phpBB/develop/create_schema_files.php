@@ -1344,6 +1344,7 @@ function get_schema_struct()
 			'post_attachment'		=> array('BOOL', 0),
 			'bbcode_bitfield'		=> array('VCHAR:255', ''),
 			'bbcode_uid'			=> array('VCHAR:8', ''),
+			'post_wiki'				=> array('BOOL', 0),
 			'post_postcount'		=> array('BOOL', 1),
 			'post_edit_time'		=> array('TIMESTAMP', 0),
 			'post_edit_reason'		=> array('STEXT_UNI', ''),
@@ -1360,6 +1361,28 @@ function get_schema_struct()
 			'post_approved'			=> array('INDEX', 'post_approved'),
 			'post_username'			=> array('INDEX', 'post_username'),
 			'tid_post_time'			=> array('INDEX', array('topic_id', 'post_time')),
+		),
+	);
+
+	$schema_data['phpbb_post_revisions'] = array(
+		'COLUMNS'		=> array(
+			'revision_id'			=> array('UINT', NULL, 'auto_increment'),
+			'post_id'				=> array('UINT', 0),
+			'user_id'				=> array('UINT', 0),
+			'revision_time'			=> array('TIMESTAMP', 0),
+			'revision_subject'		=> array('STEXT_UNI', '', 'true_sort'),
+			'revision_text'			=> array('MTEXT_UNI', ''),
+			'revision_checksum'		=> array('VCHAR:32', ''),
+			'revision_attachment'	=> array('BOOL', 0),
+			'bbcode_bitfield'		=> array('VCHAR:255', ''),
+			'bbcode_uid'			=> array('VCHAR:8', ''),
+			'revision_reason'		=> array('STEXT_UNI', ''),
+		),
+		'PRIMARY_KEY'	=> 'revision_id',
+		'KEYS'			=> array(
+			'post_id'				=> array('INDEX', 'post_id'),
+			'user_id'				=> array('INDEX', 'user_id'),
+			'time'					=> array('INDEX', 'revision_time'),
 		),
 	);
 
@@ -1545,6 +1568,17 @@ function get_schema_struct()
 			'reason_order'			=> array('USINT', 0),
 		),
 		'PRIMARY_KEY'	=> 'reason_id',
+	);
+
+	$schema_data['phpbb_revision_attachments'] = array(
+		'COLUMNS'		=> array(
+			'revision_id'			=> array('UINT', 0),
+			'attachment_id'			=> array('UINT', 0),
+		),
+		'KEYS'			=> array(
+			'r_id'					=> array('INDEX', 'revision_id'),
+			'a_id'					=> array('INDEX', 'attachment_id'),
+		),
 	);
 
 	$schema_data['phpbb_search_results'] = array(
