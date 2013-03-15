@@ -14,7 +14,7 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 
-class phpbb_controller_test extends phpbb_test_case
+class phpbb_controller_controller_test extends phpbb_test_case
 {
 	public function setUp()
 	{
@@ -38,15 +38,6 @@ class phpbb_controller_test extends phpbb_test_case
 
 		// This will need to be updated if any new routes are defined
 		$this->assertEquals(2, sizeof($routes));
-	}
-
-	public function test_controller_url_helper()
-	{
-		global $phpbb_dispatcher;
-
-		$phpbb_dispatcher = new phpbb_mock_event_dispatcher;
-		$helper = new phpbb_controller_helper;
-		$this->assertEquals($helper->url('foo/bar'),'./app.php?controller=foo/bar');
 	}
 
 	public function test_controller_resolver()
