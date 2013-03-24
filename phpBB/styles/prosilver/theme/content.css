@@ -61,7 +61,6 @@ ul.revisionlist li {
 	display: block;
 	list-style-type: none;
 	margin: 0;
-	font-size: 1.2em;
 }
 
 ul.revisionlist dl {
@@ -86,27 +85,31 @@ ul.revisionlist dd {
 	display: block;
 	float: left;
 	border-left: 1px solid transparent;
-	padding: 5px;
+	padding: 5px 11px;
 }
 
-dd.revisionview, dd.revisionuser {
-	width: 6%;
-	text-align: center;
-	line-height: 2.2em;
-	font-size: 1.2em;
+dd.revisionview {
+	width: 8%;
+	line-height: 1.0em;
+	font-size: 1.0em;
+}
+
+dd.revisionuser {
+	width: 10%;
+	line-height: 1.0em;
+	font-size: 1.0em;
 }
 
 dd.revisiondate {
-	width: 17%;
-	text-align: center;
-	line-height: 2.2em;
-	font-size: 1.2em;
+	width: 25%;
+	line-height: 1.0em;
+	font-size: 1.0em;
 }
 
 dd.revisionreason {
-	width: 50%;
-	line-height: 2.2em;
-	font-size: 1.2em;
+	width: 25%;
+	line-height: 1.0em;
+	font-size: 1.0em;
 }
 
 div.revisions_block {
@@ -133,7 +136,8 @@ ul.revisions {
 	display: block;
 	list-style-type: none;
 	width: 100%;
-	border: 1px solid #CADCEB;
+	border-top: 1px solid #CADCEB;
+	font-size: 1.1em;
 }
 
 ul.revisions:first-child {
@@ -166,26 +170,28 @@ ul.revisions li {
 	padding: 5px 10px;
 }
 
+ul.revisions li.revision_id {
+	vertical-align: middle;
+	width: 8%;
+}
+
 ul.revisions li.revision_user {
 	vertical-align: middle;
-	width: 5%;
+	width: 10%;
 }
 
 ul.revisions li.revision_user span {
-	vertical-align: text-top;
+	vertical-align: top;
+	padding-top: 2px;
+	display: inline-block;
 }
 
 ul.revisions li.revision_date {
-	width: 15%;
+	width: 25%;
 }
 
 ul.revisions li.revision_reason {
-	width: 40%;
-}
-
-ul.revisions li.revision_options {
-	text-align: right;
-	width: 15%;
+	width: 25%;
 }
 
 div.revision_action_success {
