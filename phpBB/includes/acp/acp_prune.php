@@ -504,7 +504,7 @@ class acp_prune
 			$user_ids = $usernames = array();
 			while ($row = $db->sql_fetchrow($result))
 			{
-				$user_ids[] = $row['poster_id'];
+				$user_ids[] = $row['user_id'];
 			}
 			$db->sql_freeresult($result);
 
