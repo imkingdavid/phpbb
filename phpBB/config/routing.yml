@@ -1,15 +1,4 @@
-#
-# Components that have several routes should have their own file, which must
-# be imported like so:
-#
-# routes_for_foo:
-#     resource: "routing/foo.yml"
-#
-#
-
-#
-# Components that only require a few routes may be defined directly in this
-# file, as follows:
+# Structure:
 #
 # foo_controller:
 #     pattern: /foo

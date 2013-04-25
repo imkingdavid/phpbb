@@ -86,7 +86,9 @@ class phpbb_controller_index
 	/**
 	* Controller method responsible for displaying the board index page
 	*
-	* This controller method is accessed directly from the route: /
+	* This controller method is accessed directly from the routes:
+	* /
+	* /index
 	*
 	* @return Response
 	*/
