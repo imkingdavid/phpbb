@@ -1,0 +1,15 @@
+services:
+    index.controller:
+        class: phpbb_controller_index
+        arguments:
+            - @user
+            - @request
+            - @template
+            - @notification_manager
+            - @config
+            - @auth
+            - @dbal.conn
+            - @dispatcher
+            - @controller.helper
+            - %core.root_path%
+            - %core.php_ext%
