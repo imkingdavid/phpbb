@@ -23,28 +23,37 @@ use Symfony\Component\HttpFoundation\Response;
 */
 class phpbb_controller_index
 {
-	/**
-	* Template object
-	* @var phpbb_template
-	*/
-	protected $template;
-
-	/**
-	* User object
-	* @var phpbb_user
-	*/
+	/** @var phpbb_user	*/
 	protected $user;
 
-	/**
-	* phpBB root path
-	* @var string
-	*/
+	/** @var phpbb_request */
+	protected $request;
+
+	/** @var phpbb_template	*/
+	protected $template;
+
+	/** @var phpbb_notification_manager */
+	protected $notification_manager;
+
+	/** @var phpbb_config */
+	protected $config;
+
+	/** @var phpbb_auth */
+	protected $auth;
+
+	/** @var phpbb_db_driver */
+	protected $db;
+
+	/** @var phpbb_event_dispatcher $dispatcher */
+	protected $dispatcher;
+
+	/** @var phpbb_controller_helper $helper */
+	protected $helper;
+
+	/** @var string	*/
 	protected $phpbb_root_path;
 
-	/**
-	* PHP extension
-	* @var string
-	*/
+	/** @var string	*/
 	protected $php_ext;
 
 	/**
@@ -58,7 +67,7 @@ class phpbb_controller_index
 	* @param phpbb_auth $auth
 	* @param phpbb_db_driver $db
 	* @param phpbb_event_dispatcher $dispatcher
-	* @param phpbb_controller_helper
+	* @param phpbb_controller_helper $helper
 	* @param string $phpbb_root_path
 	* @param string $php_ext
 	*/
