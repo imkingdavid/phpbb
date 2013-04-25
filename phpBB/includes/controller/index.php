@@ -139,7 +139,7 @@ class phpbb_controller_index
 	*
 	* @return null
 	*/
-	protected function mark_notification_read()
+	public function mark_notification_read()
 	{
 		if (($mark_notification = $this->request->variable('mark_notification', 0)))
 		{
@@ -168,7 +168,7 @@ class phpbb_controller_index
 	*
 	* @return string A comma-separated, HTML-formatted list of groups
 	*/
-	protected function generate_legend()
+	public function generate_legend()
 	{
 		$order_legend = ($this->config['legend_sort_groupname']) ? 'group_name' : 'group_legend';
 		// Grab group details for legend display
@@ -220,7 +220,7 @@ class phpbb_controller_index
 	*
 	* @return array
 	*/
-	protected function generate_birthday_list()
+	public function generate_birthday_list()
 	{
 		// Generate birthday list if required ...
 		$birthday_list = array();
