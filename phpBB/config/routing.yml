@@ -14,3 +14,13 @@ board_index_controller:
     requirements:
         # match '/index' or '/' for path
         index: (index|)
+
+viewtopic_controller:
+    pattern: /topic/{topic_id}/{view}
+    defaults: { _controller: topic.controller:main, view: }
+    requirements:
+        # Must be one or more digits followed by an optional URL slug
+        # containing lowercase letters, numbers, and dashes
+        topic_id: ([0-9]+)(-[a-z0-9-]+)?
+        # match one of 'print', 'unread', 'next', 'prev' or empty
+        view: (print|unread|next|prev|)

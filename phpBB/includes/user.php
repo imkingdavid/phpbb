@@ -173,70 +173,7 @@ class phpbb_user extends phpbb_session
 		$this->add_lang($lang_set);
 		unset($lang_set);
 
-		$style_request = request_var('style', 0);
-		if ($style_request && $auth->acl_get('a_styles') && !defined('ADMIN_START'))
-		{
-			global $SID, $_EXTRA_URL;
-
-			$style_id = $style_request;
-			$SID .= '&amp;style=' . $style_id;
-			$_EXTRA_URL = array('style=' . $style_id);
-		}
-		else
-		{
-			// Set up style
-			$style_id = ($style_id) ? $style_id : ((!$config['override_user_style']) ? $this->data['user_style'] : $config['default_style']);
-		}
-
-		$sql = 'SELECT *
-			FROM ' . STYLES_TABLE . " s
-			WHERE s.style_id = $style_id";
-		$result = $db->sql_query($sql, 3600);
-		$this->style = $db->sql_fetchrow($result);
-		$db->sql_freeresult($result);
-
-		// User has wrong style
-		if (!$this->style && $style_id == $this->data['user_style'])
-		{
-			$style_id = $this->data['user_style'] = $config['default_style'];
-
-			$sql = 'UPDATE ' . USERS_TABLE . "
-				SET user_style = $style_id
-				WHERE user_id = {$this->data['user_id']}";
-			$db->sql_query($sql);
-
-			$sql = 'SELECT *
-				FROM ' . STYLES_TABLE . " s
-				WHERE s.style_id = $style_id";
-			$result = $db->sql_query($sql, 3600);
-			$this->style = $db->sql_fetchrow($result);
-			$db->sql_freeresult($result);
-		}
-
-		if (!$this->style)
-		{
-			trigger_error('NO_STYLE_DATA', E_USER_ERROR);
-		}
-
-		// Now parse the cfg file and cache it
-		$parsed_items = $cache->obtain_cfg_items($this->style);
-
-		$check_for = array(
-			'pagination_sep'    => (string) ', '
-		);
-
-		foreach ($check_for as $key => $default_value)
-		{
-			$this->style[$key] = (isset($parsed_items[$key])) ? $parsed_items[$key] : $default_value;
-			settype($this->style[$key], gettype($default_value));
-
-			if (is_string($default_value))
-			{
-				$this->style[$key] = htmlspecialchars($this->style[$key]);
-			}
-		}
-
-		$phpbb_style->set_style();
+		$this->set_style($style_id, $request, $auth, $db, $phpbb_style);
 
 		$this->img_lang = $this->lang_name;
 
@@ -338,6 +275,88 @@ class phpbb_user extends phpbb_session
 		}
 
 		return;
+	}
+
+	/**
+	* Set the style viewed by the user
+	*
+	* This was refactored out of $this->setup() with minor modifications
+	* because phpbb_controller_topic requires the ability to set a
+	* forum-specific style after app.php has already called setup().
+	*
+	* @param int $style_id
+	* @param phpbb_request $request
+	* @param phpbb_auth $auth
+	* @param phpbb_db_driver $db
+	* @param phpbb_style
+	* @return null
+	*/
+	public function set_style($style_id, $request, $auth, $db, $style)
+	{
+		$style_request = $request->variable('style', 0);
+		if ($style_request && $auth->acl_get('a_styles') && !defined('ADMIN_START'))
+		{
+			global $SID, $_EXTRA_URL;
+
+			$style_id = $style_request;
+			$SID .= '&amp;style=' . $style_id;
+			$_EXTRA_URL = array('style=' . $style_id);
+		}
+		else
+		{
+			// Set up style
+			$style_id = $style_id ?: (!$config['override_user_style'] ? $this->data['user_style'] : $config['default_style']);
+		}
+
+		$sql = 'SELECT *
+			FROM ' . STYLES_TABLE . " s
+			WHERE s.style_id = $style_id";
+		$result = $db->sql_query($sql, 3600);
+		$this->style = $db->sql_fetchrow($result);
+		$db->sql_freeresult($result);
+
+		// User has wrong style
+		if (!$this->style && $style_id == $this->data['user_style'])
+		{
+			$style_id = $this->data['user_style'] = $config['default_style'];
+
+			$sql = 'UPDATE ' . USERS_TABLE . "
+				SET user_style = $style_id
+				WHERE user_id = {$this->data['user_id']}";
+			$db->sql_query($sql);
+
+			$sql = 'SELECT *
+				FROM ' . STYLES_TABLE . " s
+				WHERE s.style_id = $style_id";
+			$result = $db->sql_query($sql, 3600);
+			$this->style = $db->sql_fetchrow($result);
+			$db->sql_freeresult($result);
+		}
+
+		if (!$this->style)
+		{
+			trigger_error('NO_STYLE_DATA', E_USER_ERROR);
+		}
+
+		// Now parse the cfg file and cache it
+		$parsed_items = $cache->obtain_cfg_items($this->style);
+
+		$check_for = array(
+			'pagination_sep'    => (string) ', '
+		);
+
+		foreach ($check_for as $key => $default_value)
+		{
+			$this->style[$key] = (isset($parsed_items[$key])) ? $parsed_items[$key] : $default_value;
+			settype($this->style[$key], gettype($default_value));
+
+			if (is_string($default_value))
+			{
+				$this->style[$key] = htmlspecialchars($this->style[$key]);
+			}
+		}
+
+		$style->set_style();
 	}
 
 	/**
