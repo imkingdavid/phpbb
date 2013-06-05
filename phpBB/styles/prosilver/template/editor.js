@@ -298,9 +298,12 @@ function storeCaret(textEl) {
 * Color pallette
 */
 function colorPalette(dir, width, height) {
-	var r = 0, g = 0, b = 0;
-	var numberList = new Array(6);
-	var color = '';
+	var r = 0, 
+		g = 0, 
+		b = 0,
+		numberList = new Array(6);
+		color = '',
+		html = '';
 
 	numberList[0] = '00';
 	numberList[1] = '40';
@@ -308,36 +311,45 @@ function colorPalette(dir, width, height) {
 	numberList[3] = 'BF';
 	numberList[4] = 'FF';
 
-	document.writeln('<table cellspacing="1" cellpadding="0" border="0">');
+	html += '<table cellspacing="1" cellpadding="0" border="0">';
 
 	for (r = 0; r < 5; r++) {
-		if (dir === 'h') {
-			document.writeln('<tr>');
+		if (dir == 'h') {
+			html += '<tr>';
 		}
 
 		for (g = 0; g < 5; g++) {
-			if (dir === 'v') {
-				document.writeln('<tr>');
+			if (dir == 'v') {
+				html += '<tr>';
 			}
 
 			for (b = 0; b < 5; b++) {
 				color = String(numberList[r]) + String(numberList[g]) + String(numberList[b]);
-				document.write('<td bgcolor="#' + color + '" style="width: ' + width + 'px; height: ' + height + 'px;">');
-				document.write('<a href="#" onclick="bbfontstyle(\'[color=#' + color + ']\', \'[/color]\'); return false;"><img src="images/spacer.gif" width="' + width + '" height="' + height + '" alt="#' + color + '" title="#' + color + '" /></a>');
-				document.writeln('</td>');
+				html += '<td bgcolor="#' + color + '" style="width: ' + width + 'px; height: ' + height + 'px;">';
+				html += '<a href="#" onclick="bbfontstyle(\'[color=#' + color + ']\', \'[/color]\'); return false;" style="display: block; width: ' + width + 'px; height: ' + height + 'px; " alt="#' + color + '" title="#' + color + '"></a>';
+				html += '</td>';
 			}
 
-			if (dir === 'v') {
-				document.writeln('</tr>');
+			if (dir == 'v') {
+				html += '</tr>';
 			}
 		}
 
-		if (dir === 'h') {
-			document.writeln('</tr>');
+		if (dir == 'h') {
+			html += '</tr>';
 		}
 	}
-	document.writeln('</table>');
+	html += '</table>';
+	return html;
 }
+
+(function($) {
+	$(document).ready(function() {
+		$('#color_palette_placeholder').each(function() {
+			$(this).html(colorPalette('h', 15, 12));
+		});
+	});
+})(jQuery);
 
 /**
 * Caret Position object
@@ -382,3 +394,102 @@ function getCaretPosition(txtarea) {
 
 	return caretPos;
 }
+
+/**
+* Allow to use tab character when typing code
+* Keep indentation of last line of code when typing code
+*/
+(function($) {
+	$(document).ready(function() {
+		var doc, textarea, startTags, endTags;
+
+		// find textarea, make sure browser supports necessary functions
+		if (document.forms[form_name]) {
+			doc = document;
+		} else {
+			doc = opener.document;
+		}
+
+		if (!doc.forms[form_name]) {
+			return;
+		}
+
+		textarea = doc.forms[form_name].elements[text_name];
+		if (!textarea || typeof textarea.selectionStart !== 'number') {
+			return;
+		}
+
+		// list of allowed start and end bbcode code tags, in lower case
+		startTags = ['[code]', '[code='];
+		endTags = ['[/code]'];
+
+		function inTag() {
+			var start = textarea.selectionStart,
+				lastEnd = -1,
+				lastStart = -1,
+				i, index, value;
+
+			value = textarea.value.toLowerCase();
+
+			for (i = 0; i < startTags.length; i++) {
+				var tagLength = startTags[i].length;
+				if (start >= tagLength) {
+					index = value.lastIndexOf(startTags[i], start - tagLength);
+					lastStart = Math.max(lastStart, index);
+				}
+			}
+			if (lastStart == -1) return false;
+
+			if (start > 0) {
+				for (i = 0; i < endTags.length; i++) {
+					index = value.lastIndexOf(endTags[i], start - 1);
+					lastEnd = Math.max(lastEnd, index);
+				}
+			}
+
+			return (lastEnd < lastStart);
+		}
+
+		function getLastLine() {
+			var start = textarea.selectionStart,
+				value = textarea.value,
+				index = value.lastIndexOf("\n", start - 1);
+			return value.substring(index + 1, start);
+		}
+
+		function appendCode(code) {
+			var start = textarea.selectionStart,
+				end = textarea.selectionEnd,
+				value = textarea.value;
+			textarea.value = value.substr(0, start) + code + value.substr(end);
+			textarea.selectionStart = textarea.selectionEnd = start + code.length;
+		}
+
+		$(textarea).on('keydown', function(event) {
+			var key = event.keyCode || event.which;
+
+			// intercept tabs
+			if (key == 9) {
+				if (inTag()) {
+					appendCode("\t");
+					event.preventDefault();
+					return;
+				}
+			}
+
+			// intercept new line characters
+			if (key == 13) {
+				if (inTag()) {
+					var lastLine = getLastLine(),
+						code = '' + /^\s*/g.exec(lastLine);
+					if (code.length > 0) {
+						appendCode("\n" + code);
+						event.preventDefault();
+						return;
+					}
+				}
+			}
+		});
+	});
+})(jQuery);
+
