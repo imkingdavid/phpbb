@@ -32,6 +32,7 @@ class phpbb_functional_post_revisions_test extends phpbb_functional_test_case
 		// Count the number of revision rows. Even though the post has been
 		// revised only once, the original version of the post is considered
 		// to be a revision, so the original plus the new version make two
+		var_dump($crawler->filter('html'));
 		$crawler->filter('li.revision_id')->each(function() use (&$revisions) {
 			$revisions++;
 		});
